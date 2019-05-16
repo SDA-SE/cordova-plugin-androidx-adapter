@@ -3,6 +3,7 @@ var ARTIFACT_MAPPINGS_FILE = "artifact-mappings.json";
 var CLASS_MAPPINGS_FILE = "class-mappings.json";
 var JAVA_SRC_PATH = "./platforms/android/src";
 var BUILD_GRADLE_PATH = "./platforms/android/build.gradle";
+var PROJECT_PROPERTIES_PATH = "./platforms/android/project.properties";
 
 var deferral, fs, path, now, recursiveDir;
 
@@ -28,14 +29,17 @@ function run() {
     var startTime = now();
 
     var buildGradle = fs.readFileSync(BUILD_GRADLE_PATH).toString(),
+        projectProperties = fs.readFileSync(PROJECT_PROPERTIES_PATH).toString(),
         artifactMappings = JSON.parse(fs.readFileSync(path.join(__dirname, '.', ARTIFACT_MAPPINGS_FILE)).toString());
 
     for(var oldName in artifactMappings){
-        var oldRegExpStr = sanitiseForRegExp(oldName) + '[^"]+';
+        var oldRegExpStr = sanitiseForRegExp(oldName);
         var newName = artifactMappings[oldName];
-        buildGradle = buildGradle.replace(new RegExp(oldRegExpStr, 'gm'), newName);
+        buildGradle = buildGradle.replace(new RegExp(oldRegExpStr + '[^"]+', 'gm'), newName);
+        projectProperties = projectProperties.replace(new RegExp(oldRegExpStr + '[^\\n]+', 'gm'), newName);
     }
     fs.writeFileSync(BUILD_GRADLE_PATH, buildGradle, 'utf8');
+    fs.writeFileSync(PROJECT_PROPERTIES_PATH, projectProperties, 'utf8');
 
     var classMappings = JSON.parse(fs.readFileSync(path.join(__dirname, '.', CLASS_MAPPINGS_FILE)).toString());
     recursiveDir(JAVA_SRC_PATH, [function(file, stats){
