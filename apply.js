@@ -1,8 +1,8 @@
 var PLUGIN_NAME = "cordova-plugin-androidx-adapter";
 var ARTIFACT_MAPPINGS_FILE = "artifact-mappings.json";
 var CLASS_MAPPINGS_FILE = "class-mappings.json";
-var JAVA_SRC_PATH = "./platforms/android/app/src/main/java";
-var BUILD_GRADLE_PATH = "./platforms/android/app/build.gradle";
+var JAVA_SRC_PATH = "./platforms/android/src";
+var BUILD_GRADLE_PATH = "./platforms/android/build.gradle";
 
 var deferral, fs, path, now, recursiveDir;
 
@@ -39,7 +39,7 @@ function run() {
 
     var classMappings = JSON.parse(fs.readFileSync(path.join(__dirname, '.', CLASS_MAPPINGS_FILE)).toString());
     recursiveDir(JAVA_SRC_PATH, [function(file, stats){
-        return !file.match(".java");
+        return !stats.isDirectory() && !file.match(".java");
     }], attempt(function(err, files){
         if(err) throw err;
 
